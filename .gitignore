@@ -9,3 +9,4 @@ coverage/
 .dependency-cruiser-cache
 experiments/**/corpus/pdfs/
 experiments/**/results/
+demo/
