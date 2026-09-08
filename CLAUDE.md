@@ -57,7 +57,7 @@ bundle do browser.
 | Pacote | Dono de | Regra não-óbvia |
 |---|---|---|
 | `contracts` | ids brandeados, taxonomia de erro, os 3 wire schemas do §6 | Todo schema de fio passa por `assertWireSchema`. `.refine()` **desaparece em silêncio** do JSON Schema — regra de negócio se computa em código e se impõe no banco, nunca se pede ao modelo. |
-| `locator` | geometria de bbox, normalização, `verifyQuote()` | É o ponto de imposição de I1. `POLICY` é const **congelado**: threshold ajustável por env é flag de bypass com outro nome. |
+| `locator` | geometria de bbox, normalização, `verifyQuote()` | É o ponto de imposição de I1. Ver `packages/locator/CLAUDE.md` — a política é congelada, os offsets são preservados, e há um limite conhecido documentado. |
 | `ports` | interfaces | `LlmAdapter` **não tem** método de texto livre. I5 não é regra que se lembra de seguir; é um método que não existe. |
 | `prompts` | prompts versionados | Arquivos `vN.md` são **imutáveis**. Para mudar um prompt você adiciona `v4.md`; editar in-place reprova o CI. |
 | `llm` | o único importador de SDK de modelo | Retry em três eixos que nunca se confundem: transporte retenta; violação de schema repara **uma vez**; violação semântica **não é retry**, é gap. |
