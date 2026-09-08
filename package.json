@@ -15,7 +15,8 @@
     "test:watch": "vitest",
     "test:boundaries": "node scripts/assert-fence-fails.mjs",
     "check": "pnpm typecheck && pnpm lint && pnpm test:boundaries && pnpm test",
-    "demo": "tsx tools/demo/src/index.ts"
+    "demo": "tsx tools/demo/src/index.ts",
+    "demo:artifact": "tsx tools/demo/src/index.ts --artifact"
   },
   "devDependencies": {
     "@types/node": "22.20.1",

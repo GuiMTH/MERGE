@@ -55,8 +55,14 @@ declara `zod`.
 ## `pnpm demo` — o verificador visual de âncoras
 
 ```bash
-pnpm demo && open demo/ancoras.html      # Linux: xdg-open
+pnpm demo && xdg-open demo/ancoras.html   # macOS: open
+pnpm demo:artifact                        # mesma página, sem o envelope HTML
 ```
+
+Um mesmo gerador emite os dois formatos. `--artifact` omite
+`<!doctype>/<html>/<head>/<body>` porque o host do artifact injeta o próprio —
+escrever um segundo HTML à mão garantiria divergência entre o que se testa
+localmente e o que se publica.
 
 Gera um HTML autocontido com oito citações contra a mesma página: quatro
 legítimas, que verificam, e quatro adulteradas, que são rejeitadas — cada uma
