@@ -1,0 +1,11 @@
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.env
+.env.local
+.env.*.local
+.DS_Store
+.dependency-cruiser-cache
+experiments/**/corpus/pdfs/
+experiments/**/results/

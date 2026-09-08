@@ -1,0 +1,259 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`JSON Schema dos contratos do §6 > 6.1 enriquecimento de briefing 1`] = `
+{
+  "additionalProperties": false,
+  "properties": {
+    "lacunas": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "campo": {
+            "description": "O campo do briefing que está vago ou ausente.",
+            "maxLength": 120,
+            "minLength": 1,
+            "type": "string",
+          },
+          "criticidade": {
+            "description": "Quanto a ausência deste campo compromete o trabalho.",
+            "enum": [
+              "alta",
+              "media",
+              "baixa",
+            ],
+            "type": "string",
+          },
+          "pergunta": {
+            "description": "A pergunta a fazer, como um planner sênior perguntaria: direta, sem jargão, sem soar como auditoria. Vai ser lida pelo cliente.",
+            "maxLength": 400,
+            "minLength": 1,
+            "type": "string",
+          },
+        },
+        "required": [
+          "campo",
+          "pergunta",
+          "criticidade",
+        ],
+        "type": "object",
+      },
+      "maxItems": 30,
+      "type": "array",
+    },
+    "requisitos_evidencia": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "mensagem_pretendida": {
+            "description": "A afirmação que a peça pretende fazer, nas palavras do briefing.",
+            "maxLength": 600,
+            "minLength": 1,
+            "type": "string",
+          },
+          "obrigatorio": {
+            "description": "Se a peça não funciona sem esta afirmação.",
+            "type": "boolean",
+          },
+          "tipo_evidencia_necessaria": {
+            "description": "Que tipo de evidência sustentaria essa afirmação (desenho de estudo, desfecho, população).",
+            "maxLength": 400,
+            "minLength": 1,
+            "type": "string",
+          },
+        },
+        "required": [
+          "mensagem_pretendida",
+          "tipo_evidencia_necessaria",
+          "obrigatorio",
+        ],
+        "type": "object",
+      },
+      "maxItems": 50,
+      "type": "array",
+    },
+    "score_completude": {
+      "description": "0..1. Informação para o time, nunca critério de bloqueio de envio.",
+      "maximum": 1,
+      "minimum": 0,
+      "type": "number",
+    },
+  },
+  "required": [
+    "score_completude",
+    "lacunas",
+    "requisitos_evidencia",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`JSON Schema dos contratos do §6 > 6.2 extração e ancoragem de claims 1`] = `
+{
+  "additionalProperties": false,
+  "properties": {
+    "claims": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "ancoragem": {
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "pagina": {
+                  "description": "Página onde a citação aparece, 1-based.",
+                  "maximum": 9007199254740991,
+                  "minimum": 1,
+                  "type": "integer",
+                },
+                "quote": {
+                  "description": "Texto LITERAL presente no documento, copiado sem parafrasear, sem corrigir e sem elidir. Vai ser verificado por correspondência real contra o documento; paráfrase é rejeitada.",
+                  "maxLength": 2000,
+                  "minLength": 12,
+                  "type": "string",
+                },
+                "referencia_id": {
+                  "description": "O id da referência de onde o trecho foi tirado.",
+                  "minLength": 1,
+                  "type": "string",
+                },
+              },
+              "required": [
+                "referencia_id",
+                "pagina",
+                "quote",
+              ],
+              "type": "object",
+            },
+            "maxItems": 10,
+            "minItems": 1,
+            "type": "array",
+          },
+          "forca": {
+            "description": "Força da evidência, 1..5, onde 1 é a MAIS forte (RCT head-to-head) e 5 a mais fraca (opinião/consenso).",
+            "maximum": 5,
+            "minimum": 1,
+            "type": "integer",
+          },
+          "requisito_atendido": {
+            "description": "Qual requisito de evidência esta claim atende.",
+            "minLength": 1,
+            "type": "string",
+          },
+          "texto": {
+            "description": "A afirmação, autocontida.",
+            "maxLength": 1000,
+            "minLength": 1,
+            "type": "string",
+          },
+        },
+        "required": [
+          "texto",
+          "ancoragem",
+          "forca",
+          "requisito_atendido",
+        ],
+        "type": "object",
+      },
+      "maxItems": 60,
+      "type": "array",
+    },
+    "gaps": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "motivo": {
+            "description": "Por que não foi possível produzir uma claim ancorada para este requisito.",
+            "enum": [
+              "sem_evidencia_no_acervo",
+              "evidencia_insuficiente",
+            ],
+            "type": "string",
+          },
+          "requisito": {
+            "minLength": 1,
+            "type": "string",
+          },
+        },
+        "required": [
+          "requisito",
+          "motivo",
+        ],
+        "type": "object",
+      },
+      "maxItems": 60,
+      "type": "array",
+    },
+  },
+  "required": [
+    "claims",
+    "gaps",
+  ],
+  "type": "object",
+}
+`;
+
+exports[`JSON Schema dos contratos do §6 > 6.3 confronto com label 1`] = `
+{
+  "additionalProperties": false,
+  "properties": {
+    "cobertura": {
+      "enum": [
+        "coberta",
+        "parcial",
+        "off_label",
+        "nao_avaliada",
+      ],
+      "type": "string",
+    },
+    "justificativa": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "type": "string",
+    },
+    "requer_revisao_humana": {
+      "type": "boolean",
+    },
+    "trecho_label": {
+      "anyOf": [
+        {
+          "additionalProperties": false,
+          "properties": {
+            "label_versao": {
+              "description": "A versão do label confrontada.",
+              "minLength": 1,
+              "type": "string",
+            },
+            "pagina": {
+              "maximum": 9007199254740991,
+              "minimum": 1,
+              "type": "integer",
+            },
+            "quote": {
+              "description": "Texto LITERAL do label, verificado como qualquer outra citação.",
+              "maxLength": 2000,
+              "minLength": 12,
+              "type": "string",
+            },
+          },
+          "required": [
+            "label_versao",
+            "pagina",
+            "quote",
+          ],
+          "type": "object",
+        },
+        {
+          "type": "null",
+        },
+      ],
+    },
+  },
+  "required": [
+    "cobertura",
+    "trecho_label",
+    "justificativa",
+    "requer_revisao_humana",
+  ],
+  "type": "object",
+}
+`;
