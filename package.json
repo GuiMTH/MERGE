@@ -8,7 +8,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p apps/cockpit/tsconfig.json --noEmit",
     "lint": "eslint . && pnpm depcruise",
     "depcruise": "node scripts/depcruise.mjs",
     "test": "vitest run",
@@ -16,7 +16,9 @@
     "test:boundaries": "node scripts/assert-fence-fails.mjs",
     "check": "pnpm typecheck && pnpm lint && pnpm test:boundaries && pnpm test",
     "demo": "tsx tools/demo/src/index.ts",
-    "demo:artifact": "tsx tools/demo/src/index.ts --artifact"
+    "demo:artifact": "tsx tools/demo/src/index.ts --artifact",
+    "dev": "pnpm --filter @merge/cockpit dev",
+    "build": "pnpm --filter @merge/cockpit build"
   },
   "devDependencies": {
     "@types/node": "22.20.1",

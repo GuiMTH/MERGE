@@ -82,6 +82,16 @@ module.exports = {
       to: { path: '^packages/', pathNot: '^packages/$1/', dependencyTypes: ['local'] },
     },
     {
+      name: 'ring3-siblings-dont-couple',
+      severity: 'error',
+      comment:
+        'Anel 3 é composição: apps e tools são folhas irmãs e não se importam. O que dois deles ' +
+        'precisam compartilhar desce para o anel 0, onde ganha teste — foi o que aconteceu com ' +
+        'layoutDaPagina e com os casos canônicos.',
+      from: { path: '^(apps|tools)/([^/]+)/' },
+      to: { path: '^(apps|tools)/', pathNot: '^$1/$2/' },
+    },
+    {
       name: 'no-circular',
       severity: 'error',
       comment: 'Dependência circular.',

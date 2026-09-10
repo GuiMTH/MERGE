@@ -12,58 +12,77 @@
  */
 import { spawnSync } from 'node:child_process';
 
-const FIXTURE = 'packages/contracts/test/fixtures/violation';
-const EXPECTED_RULE = 'ring0-no-vendor-sdk';
+/**
+ * Cada par é (fixture que viola de propósito, regra que tem de reprová-lo).
+ *
+ * A segunda entrada só passou a valer algo quando `apps/` nasceu: antes disso
+ * `frontend-no-server-secrets` passava por vacuidade, porque não havia
+ * arquivo de frontend algum para reprovar — e uma regra nunca exercitada não é
+ * distinguível de uma regra quebrada.
+ */
+const CERCAS = [
+  { fixture: 'packages/contracts/test/fixtures/violation', regra: 'ring0-no-vendor-sdk', invariante: 'I4' },
+  { fixture: 'apps/cockpit/test/fixtures/violation', regra: 'frontend-no-server-secrets', invariante: 'I3' },
+];
 
-const depcruise = (tipoDeSaida) =>
+const depcruise = (fixture, tipoDeSaida) =>
   spawnSync(
     'node_modules/.bin/depcruise',
-    [FIXTURE, '--config', '.dependency-cruiser.violation.cjs', '--output-type', tipoDeSaida],
+    [fixture, '--config', '.dependency-cruiser.violation.cjs', '--output-type', tipoDeSaida],
     { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024 },
   );
 
-// Duas verificações, porque nenhuma sozinha basta:
+// Duas verificações por cerca, porque nenhuma sozinha basta:
 //  - o relatório json diz QUAL regra disparou (exit != 0 poderia vir de
 //    "módulo irresolúvel" e a cerca estaria quebrada sem ninguém notar);
 //  - o reporter `err` é o que propaga exit code, e é o que de fato reprova um
 //    build. O reporter json sai com 0 mesmo relatando violação.
-const run = depcruise('json');
+let falhou = false;
 
-if (run.error) {
-  console.error('não foi possível executar o depcruise:', run.error.message);
-  process.exit(1);
-}
+for (const { fixture, regra, invariante } of CERCAS) {
+  const run = depcruise(fixture, 'json');
 
-let report;
-try {
-  report = JSON.parse(run.stdout);
-} catch {
-  console.error('depcruise não devolveu JSON. stdout:\n', run.stdout, '\nstderr:\n', run.stderr);
-  process.exit(1);
-}
+  if (run.error) {
+    console.error(`não foi possível executar o depcruise: ${run.error.message}`);
+    process.exit(1);
+  }
 
-const violations = report.summary?.violations ?? [];
-const hit = violations.find((v) => v.rule?.name === EXPECTED_RULE);
+  let report;
+  try {
+    report = JSON.parse(run.stdout);
+  } catch {
+    console.error(`depcruise não devolveu JSON para ${fixture}.\nstdout:\n${run.stdout}\nstderr:\n${run.stderr}`);
+    process.exit(1);
+  }
 
-if (!hit) {
-  console.error(
-    `A CERCA DE I4 NÃO ESTÁ FUNCIONANDO.\n` +
-      `Esperava a regra "${EXPECTED_RULE}" disparar em ${FIXTURE}, mas ela não apareceu.\n` +
-      `Violações relatadas: ${JSON.stringify(violations.map((v) => v.rule?.name))}\n` +
-      `Se o fixture foi removido ou renomeado, restaure-o — ele é o teste da cerca, não código morto.`,
+  const violations = report.summary?.violations ?? [];
+  const hit = violations.find((v) => v.rule?.name === regra);
+
+  if (!hit) {
+    console.error(
+      `A CERCA DE ${invariante} NÃO ESTÁ FUNCIONANDO.\n` +
+        `Esperava a regra "${regra}" disparar em ${fixture}, mas ela não apareceu.\n` +
+        `Violações relatadas: ${JSON.stringify(violations.map((v) => v.rule?.name))}\n` +
+        `Se o fixture foi removido ou renomeado, restaure-o — ele é o teste da cerca, não código morto.`,
+    );
+    falhou = true;
+    continue;
+  }
+
+  const paraBuild = depcruise(fixture, 'err');
+  if (paraBuild.status === 0) {
+    console.error(
+      `A regra "${regra}" foi relatada, mas o depcruise saiu com 0 e portanto NÃO reprova um build.\n` +
+        `Verifique se a severidade da regra é "error" e não "warn".`,
+    );
+    falhou = true;
+    continue;
+  }
+
+  console.log(
+    `cerca de ${invariante} verificada: "${regra}" reprova ${hit.from} -> ${hit.to}, ` +
+      `e o build sai com ${paraBuild.status}`,
   );
-  process.exit(1);
 }
 
-const paraBuild = depcruise('err');
-if (paraBuild.status === 0) {
-  console.error(
-    `A regra "${EXPECTED_RULE}" foi relatada, mas o depcruise saiu com 0 e portanto NÃO reprova um build.\n` +
-      `Verifique se a severidade da regra é "error" e não "warn".`,
-  );
-  process.exit(1);
-}
-
-console.log(
-  `cerca de I4 verificada: "${EXPECTED_RULE}" reprova ${hit.from} -> ${hit.to}, e o build sai com ${paraBuild.status}`,
-);
+process.exit(falhou ? 1 : 0);

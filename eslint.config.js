@@ -32,9 +32,17 @@ export default tseslint.config(
 
   // Código de domínio: lint com informação de tipo.
   {
-    files: ['packages/*/src/**/*.ts', 'packages/*/test/**/*.ts', 'apps/*/src/**/*.ts', 'tools/*/src/**/*.ts'],
+    files: [
+      'packages/*/src/**/*.{ts,tsx}',
+      'packages/*/test/**/*.{ts,tsx}',
+      'apps/*/src/**/*.{ts,tsx}',
+      'tools/*/src/**/*.{ts,tsx}',
+    ],
     extends: [...tseslint.configs.strict],
     languageOptions: {
+      // `projectService` acha o tsconfig mais próximo de cada arquivo, então o
+      // cockpit é lintado sob o próprio (com jsx e lib DOM) e os pacotes sob o
+      // da raiz — que deliberadamente NÃO tem DOM.
       parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname },
     },
     rules: REGRAS_DE_DOMINIO,
@@ -50,7 +58,7 @@ export default tseslint.config(
   },
 
   {
-    files: ['**/*.test.ts', 'scripts/**/*.mjs'],
+    files: ['**/*.test.{ts,tsx}', 'scripts/**/*.mjs'],
     rules: { 'no-restricted-syntax': 'off', '@typescript-eslint/no-non-null-assertion': 'off' },
   },
 );

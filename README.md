@@ -30,27 +30,52 @@ pnpm check               # é exatamente o que o CI roda
 Comandos úteis soltos:
 
 ```bash
+pnpm dev                        # sobe a bancada em http://localhost:5173
 pnpm test --project locator     # só um pacote
 pnpm test:watch
 pnpm demo                       # gera demo/ancoras.html
 ```
 
-### `pnpm test:boundaries` — a cerca testando a si mesma
+### `pnpm test:boundaries` — as cercas testando a si mesmas
 
-A arquitetura em anéis proíbe SDK de vendor fora do anel 2 (I4). Isso é imposto
-em três camadas: `hoist=false` no `.npmrc` torna o import irresolúvel, o
-dependency-cruiser pega quem adiciona a dependência, e este comando prova que a
-regra de fato reprova — rodando o linter contra um fixture que a viola de
+A arquitetura em anéis proíbe SDK de vendor fora do anel 2 (I4), e proíbe
+qualquer coisa de servidor num bundle de browser (I3). Isso é imposto em três
+camadas: `hoist=false` no `.npmrc` torna o import irresolúvel, o
+dependency-cruiser pega quem adiciona a dependência, e este comando prova que as
+regras de fato reprovam — rodando o linter contra fixtures que as violam de
 propósito e exigindo que a regra certa dispare *e* que o build saia com código
 diferente de zero.
 
-`packages/contracts/test/fixtures/violation/` existe para falhar. **Não
-"corrija" aquele import** — consertá-lo faz o teste da cerca falhar, que é o
-comportamento pretendido.
+Dois diretórios existem para falhar, e **não devem ser "corrigidos"**:
+`packages/contracts/test/fixtures/violation/` (I4) e
+`apps/cockpit/test/fixtures/violation/` (I3). Consertar aqueles imports faz o
+teste da cerca falhar, que é o comportamento pretendido.
 
 Se quiser ver a cerca funcionando de verdade, tente importar `zod` de dentro de
 `packages/locator`: não resolve, porque o `package.json` daquele pacote não
 declara `zod`.
+
+## `pnpm dev` — a bancada de âncoras
+
+```bash
+pnpm dev            # http://localhost:5173
+```
+
+Cole um trecho de estudo e a citação que um modelo proporia. A cada tecla,
+`verifyQuote` diz se ela ancoraria e, quando não, **qual guarda mordeu** e por
+quê. Os oito casos canônicos entram como presets.
+
+É a forma prática de calibrar intuição sobre as guardas: mude um dígito numa
+citação aceita e veja a rejeição por deriva numérica; tire um `Nao` do meio e
+veja a deriva de negação.
+
+O `textarea` do documento não envolve linha de propósito — as quebras de linha
+**são** o dado, e uma linha dobrada pela largura da caixa seria indistinguível
+de uma quebra real.
+
+A bancada roda só sobre o anel 0: sem banco, sem chave, sem chamada de LLM.
+Aqui a verificação acontece no browser porque é bancada; no caminho de produção
+ela é server-side, antes de qualquer persistência.
 
 ## `pnpm demo` — o verificador visual de âncoras
 
@@ -90,15 +115,17 @@ começar.
 |---|---|---|
 | `packages/contracts` | 0 | ✅ ids brandeados, taxonomia de erro, os 3 wire schemas do §6, `assertWireSchema` |
 | `packages/locator` | 0 | ✅ geometria, normalização preservando offsets, `verifyQuote` com 5 tiers e 3 guardas |
-| `tools/demo` | 3 | ✅ verificador visual de âncoras |
+| `tools/demo` | 3 | ✅ verificador visual de âncoras (HTML estático) |
+| `apps/cockpit` | 3 | ✅ bancada interativa, `pnpm dev` |
 | `packages/db` | 2 | ⏳ migrations, RLS, triggers de append-only e supersessão |
 | `packages/ports` · `prompts` · `llm` | 1 · 0 · 2 | ⏳ |
 | `packages/pdf` | 2 | ⏳ depende do bake-off da Fase 0 |
 | `packages/dossier` | 2 | ⏳ o produto (módulo 7) |
 | `apps/*` | 3 | ⏳ |
 
-Não há API nem UI ainda: hoje o repo é biblioteca. O `pnpm demo` é o único
-artefato que se olha.
+Não há API nem persistência ainda. A bancada (`pnpm dev`) e o verificador
+estático (`pnpm demo`) são os artefatos que se olham, e ambos vivem sobre o
+anel 0.
 
 ## Estrutura
 

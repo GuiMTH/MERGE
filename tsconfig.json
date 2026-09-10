@@ -3,8 +3,11 @@
   "include": [
     "packages/*/src/**/*.ts",
     "packages/*/test/**/*.ts",
-    "apps/*/src/**/*.ts",
     "tools/*/src/**/*.ts"
   ],
-  "exclude": ["**/node_modules", "**/dist", "**/fixtures/**"]
+  "exclude": [
+    "**/node_modules",
+    "**/dist",
+    "**/fixtures/**"
+  ]
 }

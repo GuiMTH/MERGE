@@ -1,0 +1,164 @@
+/* Herda a linguagem visual do verificador publicado, inclusive a restrição que
+   vem do assunto: o amarelo de marca-texto é DADO, não acento — é o destaque
+   da âncora, a única coisa que o olho precisa achar. Daí o acento da interface
+   ser quieto e os vereditos usarem cor semântica, separada dele. */
+:root {
+  --tinta: #1b1f2a;
+  --papel: #f6f7f4;
+  --superficie: #fffefb;
+  --regra: #d5d8d1;
+  --sutil: #5c6270;
+  --verificada: #14653f;
+  --rejeitada: #a3231c;
+  --atencao: #8a5a00;
+  --realce: #ffd400;
+  --ok-fundo: #e8f0ea;
+  --nao-fundo: #f7e9e7;
+  --atencao-fundo: #f6eeda;
+  --neutro-fundo: #eceeea;
+  /* A folha do documento não inverte no tema escuro: ela representa uma
+     página impressa, e página impressa é branca. */
+  --folha: #fffefb;
+  --folha-tinta: #16181d;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --tinta: #e7e9e4;
+    --papel: #14161b;
+    --superficie: #1b1e25;
+    --regra: #2f343d;
+    --sutil: #9aa1ae;
+    --verificada: #5cc492;
+    --rejeitada: #f0897f;
+    --atencao: #e0b45c;
+    --ok-fundo: #16241d;
+    --nao-fundo: #2a1917;
+    --atencao-fundo: #2a2314;
+    --neutro-fundo: #23272f;
+  }
+}
+
+:root[data-theme='dark'] {
+  --tinta: #e7e9e4;
+  --papel: #14161b;
+  --superficie: #1b1e25;
+  --regra: #2f343d;
+  --sutil: #9aa1ae;
+  --verificada: #5cc492;
+  --rejeitada: #f0897f;
+  --atencao: #e0b45c;
+  --ok-fundo: #16241d;
+  --nao-fundo: #2a1917;
+  --atencao-fundo: #2a2314;
+  --neutro-fundo: #23272f;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--papel);
+  color: var(--tinta);
+  font: 400 15px/1.6 'IBM Plex Sans', 'Segoe UI', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.app { max-width: 78rem; margin: 0 auto; padding: 2.75rem 1.5rem 4rem; }
+
+.eyebrow {
+  font: 500 11px/1 'IBM Plex Mono', ui-monospace, monospace;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--sutil); margin: 0 0 0.8rem;
+}
+h1 {
+  font: 600 clamp(1.8rem, 3.6vw, 2.4rem)/1.1 Spectral, Georgia, serif;
+  margin: 0 0 0.7rem; letter-spacing: -0.015em; text-wrap: balance;
+}
+.lede { max-width: 44rem; margin: 0; color: var(--sutil); }
+.lede code, .aviso code { font-family: 'IBM Plex Mono', monospace; font-size: 0.92em; color: var(--tinta); }
+
+.aviso {
+  margin: 1.4rem 0 0; padding: 0.85rem 1.1rem; max-width: 44rem;
+  border-left: 3px solid var(--realce); background: var(--superficie);
+  border-radius: 0 6px 6px 0; font-size: 0.92rem;
+}
+
+h2 { font: 600 1.1rem/1.2 Spectral, Georgia, serif; margin: 0 0 0.75rem; letter-spacing: -0.01em; }
+
+.presets { margin: 2.5rem 0 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.chip {
+  font: 400 13px/1 'IBM Plex Sans', sans-serif; padding: 0.5rem 0.75rem;
+  background: var(--superficie); color: var(--tinta);
+  border: 1px solid var(--regra); border-radius: 5px; cursor: pointer;
+}
+.chip:hover { border-color: var(--sutil); }
+.chip.ativo { background: var(--tinta); color: var(--papel); border-color: var(--tinta); }
+.chip:focus-visible, .app :focus-visible { outline: 2px solid var(--verificada); outline-offset: 2px; }
+.porque { margin: 0.9rem 0 0; max-width: 46rem; color: var(--sutil); font-size: 0.92rem; }
+
+/* Controles à esquerda, veredito e fonte à direita: é a motion do revisor
+   médico, comparar afirmação e fonte lado a lado. */
+main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 2rem; margin: 2.25rem 0 0; align-items: start; }
+@media (max-width: 60rem) { main { grid-template-columns: minmax(0, 1fr); } }
+
+.controles { display: flex; flex-direction: column; gap: 0.4rem; }
+label {
+  display: flex; flex-direction: column; gap: 0.15rem; margin-top: 0.9rem;
+  font: 500 12.5px/1.4 'IBM Plex Mono', monospace; color: var(--sutil);
+}
+.controles label:first-child { margin-top: 0; }
+.dica { font: 400 11.5px/1.4 'IBM Plex Sans', sans-serif; color: var(--sutil); opacity: 0.85; }
+textarea, input[type='number'] {
+  font: 400 13px/1.6 'IBM Plex Mono', ui-monospace, monospace;
+  color: var(--tinta); background: var(--superficie);
+  border: 1px solid var(--regra); border-radius: 5px; padding: 0.6rem 0.7rem; width: 100%;
+  resize: vertical;
+}
+
+/* Com wrap=off o textarea precisa rolar na horizontal. */
+#documento { white-space: pre; overflow-x: auto; }
+input[type='number'] { max-width: 8rem; font-variant-numeric: tabular-nums; }
+
+.resultado { display: flex; flex-direction: column; gap: 1.25rem; }
+
+.veredito { padding: 1.1rem 1.2rem; border-radius: 7px; border: 1px solid var(--regra); background: var(--superficie); }
+.veredito.ok { border-left: 4px solid var(--verificada); }
+.veredito.nao { border-left: 4px solid var(--rejeitada); }
+.status { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0 0 0.9rem; }
+.selo {
+  font: 500 10.5px/1 'IBM Plex Mono', monospace; letter-spacing: 0.07em; text-transform: uppercase;
+  padding: 0.4em 0.55em; border-radius: 3px; white-space: nowrap;
+}
+.selo.ok { background: var(--ok-fundo); color: var(--verificada); }
+.selo.nao { background: var(--nao-fundo); color: var(--rejeitada); }
+.selo.atencao { background: var(--atencao-fundo); color: var(--atencao); }
+.selo.tier, .selo.motivo { background: var(--neutro-fundo); color: var(--sutil); }
+
+dl { display: grid; grid-template-columns: minmax(7rem, auto) minmax(0, 1fr); gap: 0.4rem 1rem; margin: 0; }
+dt { font: 400 12.5px/1.5 'IBM Plex Mono', monospace; color: var(--sutil); }
+dd { margin: 0; font-size: 0.9rem; min-width: 0; overflow-wrap: anywhere; }
+dd.mono { font-family: 'IBM Plex Mono', ui-monospace, monospace; font-size: 12.5px; font-weight: 500; }
+dd.num { font-variant-numeric: tabular-nums; }
+.nota { margin: 0.95rem 0 0; font-size: 0.86rem; color: var(--sutil); }
+
+/* A fonte: recorte da página, destaque posicionado só por porcentagem. */
+.fonte { margin: 0; }
+.janela { position: relative; overflow: hidden; background: var(--folha); border: 1px solid var(--regra); border-radius: 5px; }
+.folha { position: absolute; container-type: size; }
+.tk {
+  position: absolute; transform-origin: left top; white-space: pre; line-height: 1;
+  color: var(--folha-tinta); font-family: 'IBM Plex Mono', ui-monospace, monospace;
+}
+.realce { position: absolute; background: var(--realce); mix-blend-mode: multiply; border-radius: 1px; }
+figcaption {
+  margin-top: 0.5rem; font: 400 11px/1.45 'IBM Plex Mono', monospace;
+  color: var(--sutil); font-variant-numeric: tabular-nums;
+}
+
+footer {
+  margin-top: 3rem; padding-top: 1.25rem; border-top: 1px solid var(--regra);
+  color: var(--sutil); font-size: 0.88rem; max-width: 46rem;
+}
+footer p { margin: 0; }

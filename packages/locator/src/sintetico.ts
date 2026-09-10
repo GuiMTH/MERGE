@@ -91,3 +91,92 @@ export const TEXTO_ESTUDO = [
   'randomizacao. Nao houve diferenca significativa na incidencia de eventos',
   'adversos graves entre os grupos, e a taxa de descontinuacao foi de 4,7%.',
 ].join('\n');
+
+/* ─────────────────────── casos canônicos ─────────────────────────────── */
+
+/**
+ * Os oito casos canônicos do verificador.
+ *
+ * Pareados de propósito: cada rejeição tem uma aceitação vizinha de texto
+ * quase idêntico. Sem o par, um leitor conclui que o sistema rejeita o que é
+ * "diferente"; com o par, fica visível que ele rejeita o que muda o SENTIDO e
+ * aceita o que muda só a apresentação.
+ */
+export interface Caso {
+  readonly id: string;
+  readonly titulo: string;
+  readonly porque: string;
+  readonly quote: string;
+  /** O caso de contraste, quando existe. */
+  readonly par?: { readonly id: string; readonly nota: string };
+}
+
+export const CASOS: readonly Caso[] = [
+  {
+    id: 'literal',
+    titulo: 'Citação literal',
+    porque: 'O modelo copiou fiel. Casa direto na string crua, sem normalizar nada.',
+    quote: 'a dapagliflozina reduziu o desfecho primario composto',
+  },
+  {
+    id: 'quebra-linha',
+    titulo: 'Atravessa quebra de linha',
+    porque:
+      'No documento a frase quebra entre duas linhas; o modelo devolveu numa linha só. ' +
+      'O destaque tem de sair em dois retângulos, um por linha — e não como um caixote sobre o parágrafo.',
+    quote: 'com razao de risco de 0,74 (IC 95% 0,65 a 0,85) em comparacao com placebo',
+    par: { id: 'numerica', nota: 'a mesma frase com 0,84 no lugar de 0,74 é rejeitada' },
+  },
+  {
+    id: 'glifos',
+    titulo: 'Glifos trocados',
+    porque:
+      'Travessão longo e espaço inquebrável onde o documento tem hífen e espaço comum — ' +
+      'o que um copy-paste de PDF costuma produzir.',
+    quote: 'No estudo DAPA–HF, a dapagliflozina reduziu o desfecho',
+  },
+  {
+    id: 'caixa',
+    titulo: 'Só a caixa difere',
+    porque:
+      'Benigno por si só, e fica registrado. Note que o texto persistido é o do DOCUMENTO, ' +
+      'não a string que o modelo emitiu.',
+    quote: 'A DAPAGLIFLOZINA REDUZIU O DESFECHO PRIMARIO',
+  },
+  {
+    id: 'numerica',
+    titulo: 'Deriva numérica',
+    porque:
+      'Idêntica à citação de risco aceita acima, com 0,84 no lugar de 0,74. Similaridade acima ' +
+      'de 0,98 e o tamanho de efeito errado — que é justamente o número que a peça ia afirmar.',
+    quote: 'risco de 0,84 (IC 95% 0,65 a 0,85) em comparacao com placebo',
+    par: { id: 'quebra-linha', nota: 'a versão com 0,74 é aceita, no tier t1' },
+  },
+  {
+    id: 'negacao',
+    titulo: 'Deriva de negação',
+    porque:
+      'O documento diz "Nao houve diferenca". A citação começa antes e termina depois do "Nao", ' +
+      'então a janela de alinhamento é obrigada a contê-lo e a guarda morde. Similaridade ~0,96, ' +
+      'conclusão invertida.',
+    quote: 'no momento da randomizacao. houve diferenca significativa na incidencia de eventos adversos graves',
+  },
+  {
+    id: 'elidida',
+    titulo: 'Cláusula elidida',
+    porque:
+      'Doze caracteres cortados do meio. Similaridade ~0,94, acima do limite — nem o threshold ' +
+      'agregado nem um teste de comprimento pegariam. Só a guarda de divergência concentrada pega.',
+    quote:
+      'No estudo DAPA-HF, a dapagliflozina reduziu o desfecho primario composto insuficiencia cardiaca ' +
+      'ou morte cardiovascular, com razao de risco de 0,74 (IC 95%',
+  },
+  {
+    id: 'elipse',
+    titulo: 'Elipse',
+    porque:
+      'Elipse é confissão de que o texto não é literal: o modelo costurou dois trechos, e a costura ' +
+      'é onde o sentido se perde. Rejeitada de saída, sem chegar aos tiers.',
+    quote: 'a dapagliflozina reduziu … morte cardiovascular',
+  },
+];

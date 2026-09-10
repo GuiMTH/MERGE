@@ -1,4 +1,4 @@
-import type { BBoxNorm, BBoxPdf, GeometriaPagina, Rotacao } from './contract.js';
+import type { BBoxNorm, BBoxPdf, CamadaTextoPagina, GeometriaPagina, Rotacao } from './contract.js';
 
 /**
  * Conversão de geometria. Um único lugar decide, de propósito.
@@ -129,4 +129,38 @@ export function clipeHorizontal(bbox: BBoxNorm, fracaoInicio: number, fracaoFim:
   const [x0, y0, x1, y1] = bbox;
   const largura = x1 - x0;
   return [x0 + largura * grampear(fracaoInicio), y0, x0 + largura * grampear(fracaoFim), y1];
+}
+
+/**
+ * A caixa que contém todos os tokens da página, com folga.
+ *
+ * É o recorte que se mostra a um humano. Uma folha A4 tem 792pt e um trecho de
+ * estudo ocupa algumas linhas no topo: exibir a página inteira gasta a maior
+ * parte da caixa em branco e deixa o texto ilegível. É o mesmo conceito do
+ * `crop` que o dossiê gera por citação, e sai das mesmas coordenadas
+ * normalizadas — não de um segundo cálculo.
+ */
+export function recorteDoConteudo(p: CamadaTextoPagina, folga = 0.022): BBoxNorm {
+  const caixas = p.tokens.map((t) => pdfParaNorm(t.bbox, p.geometria));
+  if (caixas.length === 0) return [0, 0, 1, 1];
+
+  let x0 = 1;
+  let y0 = 1;
+  let x1 = 0;
+  let y1 = 0;
+  for (const [a, b, c, d] of caixas) {
+    x0 = Math.min(x0, a);
+    y0 = Math.min(y0, b);
+    x1 = Math.max(x1, c);
+    y1 = Math.max(y1, d);
+  }
+
+  // Folga vertical maior: uma linha de texto é bem mais baixa que larga, e
+  // folga igual nos dois eixos deixa o recorte apertado em cima e embaixo.
+  return [
+    Math.max(0, x0 - folga),
+    Math.max(0, y0 - folga * 1.6),
+    Math.min(1, x1 + folga),
+    Math.min(1, y1 + folga * 1.6),
+  ];
 }
